@@ -118,28 +118,68 @@ async function getClient(
   }
 }
 
+export class ClassCodeLensProvider implements vscode.CodeLensProvider {
+  onDidChangeCodeLenses?: vscode.Event<void>;
+
+  provideCodeLenses(
+    document: vscode.TextDocument,
+    token: vscode.CancellationToken
+  ): vscode.ProviderResult<vscode.CodeLens[]> {
+    const codeLenses: vscode.CodeLens[] = [];
+    const text = document.getText();
+    const regEx = /\bclass\s+(\w+)/g;
+    let match;
+
+    while ((match = regEx.exec(text))) {
+      const startPos = document.positionAt(match.index);
+      const endPos = document.positionAt(match.index + match[0].length);
+      const range = new vscode.Range(startPos, endPos);
+
+      codeLenses.push(
+        new vscode.CodeLens(range, {
+          title: "Create Data Store Instance",
+          command: "boxelrealm.createInstance",
+          arguments: [document.uri, match[1]], // Pass the class name
+        })
+      );
+    }
+
+    return codeLenses;
+  }
+}
+
 export async function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand("boxelrealm.login", async (_) => {});
 
   vscode.window.showInformationMessage(`Boxel - logging in`);
   let firstRealm: string;
 
-  const username = vscode.workspace
-    .getConfiguration("boxelrealm")
-    .get<string>("realmUsername");
+  context.subscriptions.push(
+    vscode.languages.registerCodeLensProvider(
+      { language: "glimmer-ts" },
+      new ClassCodeLensProvider()
+    )
+  );
+
+  vscode.commands.registerCommand(
+    "boxelrealm.createInstance",
+    async (uri, className) => {
+      console.log("!!! Creating instance", uri, className);
+    }
+  );
+
+  const username = "admin";
   if (!username) {
     throw new Error("Realm username not set");
   }
 
-  const password = vscode.workspace
-    .getConfiguration("boxelrealm")
-    .get<string>("realmPassword");
+  const password = "password";
   if (!password) {
     throw new Error("Realm password not set");
   }
   const matrixClient = await getClient(
     context,
-    "https://matrix.boxel.ai/",
+    "http://localhost:8008/",
     username,
     password
   );

@@ -23,6 +23,10 @@
   "contributes": {
     "commands": [
       {
+        "command": "boxelrealm.createInstance",
+        "title": "Create Data Store Instance"
+      },
+      {
         "command": "boxelrealm.login",
         "title": "Login",
         "category": "boxelrealm"
