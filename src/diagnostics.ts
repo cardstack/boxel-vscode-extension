@@ -8,6 +8,12 @@ async function getErrorMessagesForFile(
   fileUri: vscode.Uri,
   realmFs: RealmFS
 ): Promise<string | undefined> {
+  if (
+    fileUri.scheme !== "boxelrealm+http" &&
+    fileUri.scheme !== "boxelrealm+https"
+  ) {
+    return undefined;
+  }
   const file = await realmFs.fetchRawTextFile(fileUri);
   if (file.status == 200) {
     return undefined;
