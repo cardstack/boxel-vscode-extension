@@ -39,7 +39,6 @@ async function loginWithEmail(
 }
 
 async function login(username: string, password: string, matrixUrl: string) {
-  console.log("Login with password", matrixUrl, username, password);
   try {
     let client = createClient({
       baseUrl: matrixUrl,
@@ -48,7 +47,7 @@ async function login(username: string, password: string, matrixUrl: string) {
     return login;
   } catch (error) {
     console.log("Login with password failed, trying login with email", error);
-    let login = await loginWithEmail(matrixUrl, username, password);
+    let login = await loginWithEmail(username, password, matrixUrl);
     return login;
   }
 }
